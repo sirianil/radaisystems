@@ -8,6 +8,8 @@ The application is running now. Navigate to on your browser locally to send requ
 
 Running Tests:
 
+`python3 -m venv .venv`
+
 `source .venv/bin/activate`
 
 `pip install -r requirements.txt`
