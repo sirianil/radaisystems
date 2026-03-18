@@ -14,10 +14,6 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-@app.get("/")
-def read_root():
-    return {"Hello": "World"}
-
 @app.get("/permits/search", response_model=list[PermitResponse])
 def search_permits(
     applicant: Optional[str] = None,
