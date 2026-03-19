@@ -1,6 +1,4 @@
 # Database session setup using SQLAlchemy.
-# DATABASE_URL points to a SQLite file inside the Docker container at /code/permits.db.
-# get_db() is a FastAPI dependency that yields a session and ensures it is closed afterward.
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, DeclarativeBase

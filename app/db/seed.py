@@ -1,5 +1,4 @@
 # Seeds the database from the SF Mobile Food Facility Permit CSV.
-# Only runs if the permits table is empty, so it is safe to call on every startup.
 
 import pandas as pd
 from app.db.session import SessionLocal
@@ -8,11 +7,6 @@ from app.models.orm import Permit
 CSV_PATH = "/code/raw_data/Mobile_Food_Facility_Permit_20260317.csv"
 
 def seed(db=None):
-    """Load permit records from CSV into the database.
-
-    Accepts an optional db session so tests can pass their own session.
-    If none is provided, opens and closes one internally.
-    """
     close_after = db is None
     if db is None:
         db = SessionLocal()

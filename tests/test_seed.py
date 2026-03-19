@@ -27,7 +27,6 @@ SAMPLE_CSV = """locationid,Applicant,FacilityType,LocationDescription,Address,pe
 1002,Snack Cart,Push Cart,,456 Oak Ave,24MFF-00002,REQUESTED,Chips,37.78,-122.42,http://schedule.url,,20240201,
 """
 
-
 @pytest.fixture
 def csv_path(tmp_path):
     path = tmp_path / "test_permits.csv"

@@ -94,7 +94,7 @@
       if (status && type === 'applicant') params.set('status', status);
 
       try {
-        const res = await fetch(`/permits/search?${params}`);
+        const res = await fetch(`/permits/search/${type}?${params}`);
         if (!res.ok) { const e = await res.json(); out.innerHTML = `<div class="error">${e.detail}</div>`; return; }
         const data = await res.json();
         out.innerHTML = data.length ? data.map(renderPermit).join('') : '<div class="empty">No results found.</div>';

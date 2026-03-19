@@ -8,8 +8,23 @@ from app.models.orm import Permit
 from app.models.schemas import NearestPermitResponse
 
 EARTH_RADIUS_METERS = 6_371_000
-# Rough bounding box used to pre-filter candidates before exact distance calculation (~11km).
-BOUNDING_BOX_DEGREES = 0.1
+BOUNDING_BOX_DEGREES = 0.1       # Initial bounding box (~11km), covers most of SF.
+MAX_BOUNDING_BOX_DEGREES = 0.5   # Cap at ~55km (approximately greater SF Bay Area).
+
+def search_by_applicant(
+    db: Session,
+    applicant: str,
+    status: Optional[str] = None,
+) -> list[Permit]:
+    """Return all permits exactly matching the given applicant name, optionally filtered by status."""
+    query = db.query(Permit).filter(Permit.applicant == applicant)
+    if status:
+        query = query.filter(Permit.status.ilike(status))
+    return query.all()
+
+def search_by_address(db: Session, address: str) -> list[Permit]:
+    """Return all permits whose address starts with the given string (case-insensitive)."""
+    return db.query(Permit).filter(Permit.address.ilike(f"{address}%")).all()
 
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Return the great-circle distance in meters between two lat/lon points."""
@@ -19,21 +34,6 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     return 2 * EARTH_RADIUS_METERS * atan2(sqrt(a), sqrt(1 - a))
 
-def search_by_applicant(
-    db: Session,
-    applicant: str,
-    status: Optional[str] = None,
-) -> list[Permit]:
-    """Return all permits matching the given applicant name, optionally filtered by status."""
-    query = db.query(Permit).filter(Permit.applicant == applicant)
-    if status:
-        query = query.filter(Permit.status.ilike(status))
-    return query.all()
-
-def search_by_address(db: Session, address: str) -> list[Permit]:
-    """Return all permits whose address contains the given substring (case-insensitive)."""
-    return db.query(Permit).filter(Permit.address.ilike(f"%{address}%")).all()
-
 def nearest_permits(
     db: Session,
     lat: float,
@@ -42,19 +42,24 @@ def nearest_permits(
 ) -> list[NearestPermitResponse]:
     """Return up to 5 permits nearest to the given coordinates.
 
-    Applies a bounding-box pre-filter in SQL to reduce the candidate set,
-    then sorts by exact haversine distance in Python.
+    Starts with a small bounding box and doubles it each iteration until at least
+    5 candidates are found or MAX_BOUNDING_BOX_DEGREES is reached. The final
+    candidate set is then sorted by exact haversine distance and the top 5 returned.
     """
-    query = db.query(Permit).filter(
-        Permit.latitude.isnot(None),
-        Permit.longitude.isnot(None),
-        Permit.latitude.between(lat - BOUNDING_BOX_DEGREES, lat + BOUNDING_BOX_DEGREES),
-        Permit.longitude.between(lon - BOUNDING_BOX_DEGREES, lon + BOUNDING_BOX_DEGREES),
-    )
-    if status:
-        query = query.filter(Permit.status.ilike(status))
-
-    candidates = query.all()
+    box = BOUNDING_BOX_DEGREES
+    while True:
+        query = db.query(Permit).filter(
+            Permit.latitude.isnot(None),
+            Permit.longitude.isnot(None),
+            Permit.latitude.between(lat - box, lat + box),
+            Permit.longitude.between(lon - box, lon + box),
+        )
+        if status:
+            query = query.filter(Permit.status.ilike(status))
+        candidates = query.all()
+        if len(candidates) >= 5 or box >= MAX_BOUNDING_BOX_DEGREES:
+            break
+        box = min(box * 2, MAX_BOUNDING_BOX_DEGREES)
     ranked = sorted(candidates, key=lambda p: haversine(lat, lon, p.latitude, p.longitude))
 
     results = []

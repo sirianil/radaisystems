@@ -12,6 +12,21 @@ from app.models.orm import Permit
 from app.main import app
 
 @pytest.fixture
+def db_session():
+    """Bare in-memory session for tests that need to control the client themselves."""
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    yield session
+    session.close()
+
+
+@pytest.fixture
 def client():
     engine = create_engine(
         "sqlite:///:memory:",
@@ -77,7 +92,7 @@ def test_excludes_null_coordinates(client):
 
 
 def test_fewer_than_5_when_not_enough_matches(client):
-    # Search far away — only trucks within bounding box (~11km) are considered
+    # Search far away — even the max bounding box won't reach SF trucks
     response = client.get("/permits/nearest?lat=40.0&lon=-74.0")
     assert response.status_code == 200
     assert len(response.json()) == 0

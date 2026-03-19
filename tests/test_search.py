@@ -72,12 +72,19 @@ def test_search_applicant_no_match_returns_empty(client):
 
 # /permits/search/address
 
-def test_search_address_partial_match(client):
-    response = client.get("/permits/search/address?address=SANSOME")
+def test_search_address_starts_with_match(client):
+    # "100" is a prefix of "100 SANSOME ST" but not of the other addresses
+    response = client.get("/permits/search/address?address=100")
     assert response.status_code == 200
     results = response.json()
-    assert len(results) == 2
-    assert all("SANSOME" in r["address"] for r in results)
+    assert len(results) == 1
+    assert results[0]["address"] == "100 SANSOME ST"
+
+def test_search_address_mid_string_returns_nothing(client):
+    # "SANSOME" appears mid-address, so startsWith should not match
+    response = client.get("/permits/search/address?address=SANSOME")
+    assert response.status_code == 200
+    assert response.json() == []
 
 def test_search_address_no_match_returns_empty(client):
     response = client.get("/permits/search/address?address=xyz")
