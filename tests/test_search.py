@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.database import Base, get_db
-from app.models import Permit
+from app.db.session import Base, get_db
+from app.models.orm import Permit
 from app.main import app
 
 @pytest.fixture
@@ -35,42 +35,48 @@ def client():
     session.close()
 
 
-def test_search_by_applicant_exact_match(client):
-    response = client.get("/permits/search?applicant=Sanchez Tacos")
+# /permits/search/applicant
+
+def test_search_applicant_exact_match(client):
+    response = client.get("/permits/search/applicant?applicant=Sanchez Tacos")
     assert response.status_code == 200
     results = response.json()
     assert len(results) == 1
     assert results[0]["applicant"] == "Sanchez Tacos"
 
-
-def test_search_by_applicant_partial_returns_nothing(client):
-    response = client.get("/permits/search?applicant=sanchez")
+def test_search_applicant_partial_returns_nothing(client):
+    response = client.get("/permits/search/applicant?applicant=Sanchez")
     assert response.status_code == 200
     assert response.json() == []
 
-
-def test_search_by_applicant_and_status(client):
-    response = client.get("/permits/search?applicant=Sanchez Tacos&status=APPROVED")
+def test_search_applicant_with_status_filter(client):
+    response = client.get("/permits/search/applicant?applicant=Sanchez Tacos&status=APPROVED")
     assert response.status_code == 200
     results = response.json()
     assert len(results) == 1
     assert results[0]["status"] == "APPROVED"
 
+def test_search_applicant_status_filter_excludes_wrong_status(client):
+    response = client.get("/permits/search/applicant?applicant=Sanchez Tacos&status=EXPIRED")
+    assert response.status_code == 200
+    assert response.json() == []
 
-def test_search_by_address_partial_match(client):
-    response = client.get("/permits/search?address=SAN")
+def test_search_applicant_no_match_returns_empty(client):
+    response = client.get("/permits/search/applicant?applicant=Unknown Vendor")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+# /permits/search/address
+
+def test_search_address_partial_match(client):
+    response = client.get("/permits/search/address?address=SANSOME")
     assert response.status_code == 200
     results = response.json()
     assert len(results) == 2
     assert all("SANSOME" in r["address"] for r in results)
 
-
-def test_search_no_params_returns_400(client):
-    response = client.get("/permits/search")
-    assert response.status_code == 400
-
-
-def test_search_no_match_returns_empty(client):
-    response = client.get("/permits/search?address=xyz")
+def test_search_address_no_match_returns_empty(client):
+    response = client.get("/permits/search/address?address=xyz")
     assert response.status_code == 200
     assert response.json() == []

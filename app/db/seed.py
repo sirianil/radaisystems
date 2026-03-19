@@ -1,6 +1,6 @@
 import pandas as pd
-from app.database import SessionLocal
-from app.models import Permit
+from app.db.session import SessionLocal
+from app.models.orm import Permit
 
 CSV_PATH = "/code/raw_data/Mobile_Food_Facility_Permit_20260317.csv"
 

@@ -1,12 +1,13 @@
-from typing import Optional
 from sqlalchemy import Column, Integer, Float, String
-from pydantic import BaseModel, ConfigDict
-from app.database import Base
+from app.db.session import Base
 
 class Permit(Base):
+    """
+    Represents the 'permits' table in the database.
+    """
     __tablename__ = "permits"
 
-    # Maps CSV column names to model field names
+    # Maps raw CSV column names to model field names
     csv_column_map = {
         "locationid": "locationid",
         "Applicant": "applicant",
@@ -38,24 +39,3 @@ class Permit(Base):
     days_hours = Column(String)
     approved = Column(String)
     expiration_date = Column(String)
-
-class PermitResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    locationid: int
-    applicant: Optional[str]
-    facility_type: Optional[str]
-    location_description: Optional[str]
-    address: Optional[str]
-    permit: Optional[str]
-    status: Optional[str]
-    food_items: Optional[str]
-    latitude: Optional[float]
-    longitude: Optional[float]
-    schedule: Optional[str]
-    days_hours: Optional[str]
-    approved: Optional[str]
-    expiration_date: Optional[str]
-
-class NearestPermitResponse(PermitResponse):
-    distance_meters: float

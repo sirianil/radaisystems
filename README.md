@@ -16,6 +16,21 @@ Running Tests:
 
 `pytest tests/`
 
+
+Repository Structure:
+app/
+  ├── main.py              # app init, lifespan, static route, router registration               
+  ├── api/                                                                                       
+  │   └── permits.py       # route handlers only                                                 
+  ├── services/                                                                                  
+  │   └── permits.py       # haversine, search_permits, nearest_permits                          
+  ├── models/                                                                                    
+  │   ├── orm.py           # Permit SQLAlchemy model                                             
+  │   └── schemas.py       # PermitResponse, NearestPermitResponse                               
+  └── db/                                                                                        
+      ├── session.py       # engine, Base, get_db                                                
+      └── seed.py          # seed()
+
 Setup explanation:
 
 I have a simple Dockerfile that creates a working directory, copies and installs requiements in requirements.txt, copies the raw data into the container, navigates to the app directory and runs the app using the fastapi command.

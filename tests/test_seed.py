@@ -4,9 +4,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from unittest.mock import patch
 
-from app.database import Base
-from app.models import Permit
-from app.seed import seed
+from app.db.session import Base
+from app.models.orm import Permit
+from app.db.seed import seed
 
 
 @pytest.fixture
@@ -33,13 +33,13 @@ def csv_path(tmp_path):
 
 # Unit test for correct number of rows
 def test_seed_inserts_rows(db, csv_path):
-    with patch("app.seed.CSV_PATH", csv_path):
+    with patch("app.db.seed.CSV_PATH", csv_path):
         seed(db)
     assert db.query(Permit).count() == 2
 
 # Unit test for mapping db table column names to csv columns
 def test_seed_maps_columns_correctly(db, csv_path):
-    with patch("app.seed.CSV_PATH", csv_path):
+    with patch("app.db.seed.CSV_PATH", csv_path):
         seed(db)
     permit = db.query(Permit).filter_by(locationid=1001).first()
     assert permit.applicant == "Taco Truck"
@@ -49,7 +49,7 @@ def test_seed_maps_columns_correctly(db, csv_path):
 
 # Unit test for empty csv values
 def test_seed_stores_null_for_missing_values(db, csv_path):
-    with patch("app.seed.CSV_PATH", csv_path):
+    with patch("app.db.seed.CSV_PATH", csv_path):
         seed(db)
     permit = db.query(Permit).filter_by(locationid=1002).first()
     assert permit.location_description is None
@@ -57,7 +57,7 @@ def test_seed_stores_null_for_missing_values(db, csv_path):
 
 # Unit test to ensure seeding only once
 def test_seed_skips_if_already_seeded(db, csv_path):
-    with patch("app.seed.CSV_PATH", csv_path):
+    with patch("app.db.seed.CSV_PATH", csv_path):
         seed(db)
         seed(db)
     assert db.query(Permit).count() == 2

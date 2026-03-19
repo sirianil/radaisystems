@@ -4,8 +4,8 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-from app.database import Base, get_db
-from app.models import Permit
+from app.db.session import Base, get_db
+from app.models.orm import Permit
 from app.main import app
 
 @pytest.fixture
