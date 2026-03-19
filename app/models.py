@@ -3,7 +3,6 @@ from sqlalchemy import Column, Integer, Float, String
 from pydantic import BaseModel, ConfigDict
 from app.database import Base
 
-
 class Permit(Base):
     __tablename__ = "permits"
 
@@ -51,7 +50,12 @@ class PermitResponse(BaseModel):
     permit: Optional[str]
     status: Optional[str]
     food_items: Optional[str]
+    latitude: Optional[float]
+    longitude: Optional[float]
     schedule: Optional[str]
     days_hours: Optional[str]
     approved: Optional[str]
     expiration_date: Optional[str]
+
+class NearestPermitResponse(PermitResponse):
+    distance_meters: float
