@@ -47,7 +47,15 @@ def test_search_applicant_exact_match(client):
     assert len(results) == 1
     assert results[0]["applicant"] == "Sanchez Tacos"
 
+def test_search_applicant_case_insensitive(client):
+    response = client.get("/permits/search/applicant?applicant=sanchez tacos")
+    assert response.status_code == 200
+    results = response.json()
+    assert len(results) == 1
+    assert results[0]["applicant"] == "Sanchez Tacos"
+
 def test_search_applicant_partial_returns_nothing(client):
+    # ilike is exact (case-insensitive), not a substring match
     response = client.get("/permits/search/applicant?applicant=Sanchez")
     assert response.status_code == 200
     assert response.json() == []

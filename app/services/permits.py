@@ -15,16 +15,17 @@ def search_by_applicant(
     db: Session,
     applicant: str,
     status: Optional[str] = None,
+    limit: int = 100,
 ) -> list[Permit]:
-    """Return all permits exactly matching the given applicant name, optionally filtered by status."""
-    query = db.query(Permit).filter(Permit.applicant == applicant)
+    """Return permits matching the given applicant name (case-insensitive), optionally filtered by status."""
+    query = db.query(Permit).filter(Permit.applicant.ilike(applicant))
     if status:
         query = query.filter(Permit.status.ilike(status))
-    return query.all()
+    return query.limit(limit).all()
 
-def search_by_address(db: Session, address: str) -> list[Permit]:
+def search_by_address(db: Session, address: str, limit: int = 100) -> list[Permit]:
     """Return all permits whose address starts with the given string (case-insensitive)."""
-    return db.query(Permit).filter(Permit.address.ilike(f"{address}%")).all()
+    return db.query(Permit).filter(Permit.address.ilike(f"{address}%")).limit(limit).all()
 
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Return the great-circle distance in meters between two lat/lon points."""

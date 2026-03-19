@@ -2,7 +2,6 @@
 # Uses a temporary CSV file and an in-memory SQLite database to avoid touching the real data.
 
 import pytest
-import pandas as pd
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from unittest.mock import patch

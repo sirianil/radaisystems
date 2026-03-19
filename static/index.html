@@ -66,6 +66,12 @@
   </div>
 
   <script>
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
     document.getElementById('search-type').addEventListener('change', function() {
       const isAddress = this.value === 'address';
       document.getElementById('search-label').textContent = isAddress ? 'Address' : 'Applicant name';
@@ -75,11 +81,15 @@
     });
 
     function renderPermit(p) {
+      const name = escapeHtml(p.applicant || 'Unknown');
+      const status = escapeHtml(p.status || '');
+      const address = escapeHtml(p.address || '');
+      const food = p.food_items ? escapeHtml(p.food_items.slice(0, 80)) + (p.food_items.length > 80 ? '…' : '') : '';
       return `
         <div class="result-item">
-          <strong>${p.applicant || 'Unknown'}</strong> [${p.status || ''}]<br/>
-          ${p.address || ''}<br/>
-          ${p.food_items ? p.food_items.slice(0, 80) + (p.food_items.length > 80 ? '…' : '') : ''}
+          <strong>${name}</strong> [${status}]<br/>
+          ${address}<br/>
+          ${food}
         </div>`;
     }
 
@@ -95,7 +105,7 @@
 
       try {
         const res = await fetch(`/permits/search/${type}?${params}`);
-        if (!res.ok) { const e = await res.json(); out.innerHTML = `<div class="error">${e.detail}</div>`; return; }
+        if (!res.ok) { const e = await res.json(); out.innerHTML = `<div class="error">${escapeHtml(String(e.detail))}</div>`; return; }
         const data = await res.json();
         out.innerHTML = data.length ? data.map(renderPermit).join('') : '<div class="empty">No results found.</div>';
       } catch (e) {
@@ -115,13 +125,13 @@
 
       try {
         const res = await fetch(`/permits/nearest?${params}`);
-        if (!res.ok) { const e = await res.json(); out.innerHTML = `<div class="error">${e.detail}</div>`; return; }
+        if (!res.ok) { const e = await res.json(); out.innerHTML = `<div class="error">${escapeHtml(String(e.detail))}</div>`; return; }
         const data = await res.json();
         out.innerHTML = data.length
           ? data.map(p => `
             <div class="result-item">
-              <strong>${p.applicant || 'Unknown'}</strong> [${p.status || ''}]<br/>
-              ${p.address || ''}<br/>
+              <strong>${escapeHtml(p.applicant || 'Unknown')}</strong> [${escapeHtml(p.status || '')}]<br/>
+              ${escapeHtml(p.address || '')}<br/>
               ${Math.round(p.distance_meters)}m away
             </div>`).join('')
           : '<div class="empty">No results found.</div>';
