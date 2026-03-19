@@ -1,3 +1,6 @@
+# Pydantic response schemas used by the API layer.
+# from_attributes=True allows building these models directly from SQLAlchemy ORM objects.
+
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
 
@@ -20,4 +23,5 @@ class PermitResponse(BaseModel):
     expiration_date: Optional[str]
 
 class NearestPermitResponse(PermitResponse):
+    # Extends PermitResponse with a computed distance from the query point.
     distance_meters: float

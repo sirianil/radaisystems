@@ -1,3 +1,6 @@
+# ORM model for the permits table.
+# csv_column_map maps raw CSV header names to snake_case field names used in the model.
+
 from sqlalchemy import Column, Integer, Float, String
 from app.db.session import Base
 

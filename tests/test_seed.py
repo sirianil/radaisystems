@@ -1,3 +1,6 @@
+# Tests for the database seed function.
+# Uses a temporary CSV file and an in-memory SQLite database to avoid touching the real data.
+
 import pytest
 import pandas as pd
 from sqlalchemy import create_engine

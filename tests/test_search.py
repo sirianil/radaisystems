@@ -1,3 +1,6 @@
+# Tests for /permits/search/applicant and /permits/search/address endpoints.
+# Each test uses an in-memory SQLite database populated with a small fixture set.
+
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
