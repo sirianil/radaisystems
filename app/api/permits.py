@@ -6,7 +6,9 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from app.db.session import get_db
 from app.models.schemas import PermitResponse, NearestPermitResponse
-from app.services import permits as permit_service
+from app.services.search_by_applicant import search_by_applicant as svc_search_by_applicant
+from app.services.search_by_address import search_by_address as svc_search_by_address
+from app.services.nearest_permits import nearest_permits as svc_nearest_permits
 
 router = APIRouter(prefix="/permits")
 
@@ -17,7 +19,7 @@ def search_by_applicant(
     limit: Annotated[int, Query(ge=1, le=500)] = 100,
     db: Session = Depends(get_db),
 ):
-    return permit_service.search_by_applicant(db, applicant=applicant, status=status, limit=limit)
+    return svc_search_by_applicant(db, applicant=applicant, status=status, limit=limit)
 
 @router.get("/search/address", response_model=list[PermitResponse])
 def search_by_address(
@@ -25,7 +27,7 @@ def search_by_address(
     limit: Annotated[int, Query(ge=1, le=500)] = 100,
     db: Session = Depends(get_db),
 ):
-    return permit_service.search_by_address(db, address=address, limit=limit)
+    return svc_search_by_address(db, address=address, limit=limit)
 
 @router.get("/nearest", response_model=list[NearestPermitResponse])
 def nearest_permits(
@@ -34,4 +36,4 @@ def nearest_permits(
     status: Optional[str] = "APPROVED",
     db: Session = Depends(get_db),
 ):
-    return permit_service.nearest_permits(db, lat=lat, lon=lon, status=status)
+    return svc_nearest_permits(db, lat=lat, lon=lon, status=status)

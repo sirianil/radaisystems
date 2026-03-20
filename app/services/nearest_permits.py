@@ -1,6 +1,3 @@
-# Business logic for permit queries.
-# Keeps database access out of the API layer.
-
 from math import radians, sin, cos, sqrt, atan2
 from typing import Optional
 from sqlalchemy.orm import Session
@@ -11,21 +8,6 @@ EARTH_RADIUS_METERS = 6_371_000
 BOUNDING_BOX_DEGREES = 0.1       # Initial bounding box (~11km), covers most of SF.
 MAX_BOUNDING_BOX_DEGREES = 0.5   # Cap at ~55km (approximately greater SF Bay Area).
 
-def search_by_applicant(
-    db: Session,
-    applicant: str,
-    status: Optional[str] = None,
-    limit: int = 100,
-) -> list[Permit]:
-    """Return permits matching the given applicant name (case-insensitive), optionally filtered by status."""
-    query = db.query(Permit).filter(Permit.applicant.ilike(applicant))
-    if status:
-        query = query.filter(Permit.status.ilike(status))
-    return query.limit(limit).all()
-
-def search_by_address(db: Session, address: str, limit: int = 100) -> list[Permit]:
-    """Return all permits whose address starts with the given string (case-insensitive)."""
-    return db.query(Permit).filter(Permit.address.ilike(f"{address}%")).limit(limit).all()
 
 def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     """Return the great-circle distance in meters between two lat/lon points."""
@@ -34,6 +16,7 @@ def haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     dlon = lon2 - lon1
     a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
     return 2 * EARTH_RADIUS_METERS * atan2(sqrt(a), sqrt(1 - a))
+
 
 def nearest_permits(
     db: Session,

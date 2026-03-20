@@ -48,7 +48,9 @@ app/
 ├── api/
 │   └── permits.py       # Route handlers
 ├── services/
-│   └── permits.py       # Business logic
+│   ├── search_by_applicant.py   # Business logic for applicant search
+│   ├── search_by_address.py     # Business logic for address search
+│   └── nearest_permits.py       # Business logic for nearest-permit lookup
 ├── models/
 │   ├── orm.py           # Permit SQLAlchemy model
 │   └── schemas.py       # PermitResponse, NearestPermitResponse
@@ -57,7 +59,7 @@ app/
     └── seed.py          # seed()
 ```
 
-The source files are organized around separation of concerns. At the root level, `main.py` initializes the app, sets up the database, calls the seed method to populate the SQLite DB from the CSV file in `raw_data/`, and registers the routes defined in `api/permits.py`. There are three routes — one for each required task. Once a request is received, it is handed off to `services/permits.py` which handles all database access and business logic. Schemas for both database tables and API responses are defined in `models/`.
+The source files are organized around separation of concerns. At the root level, `main.py` initializes the app, sets up the database, calls the seed method to populate the SQLite DB from the CSV file in `raw_data/`, and registers the routes defined in `api/permits.py`. There are three routes — one for each required task. Once a request is received, it is handed off to the corresponding service module in `services/`, each of which handles the database access and business logic for one endpoint. Schemas for both database tables and API responses are defined in `models/`.
 
 ---
 
