@@ -19,7 +19,7 @@ docker build -t radaisystems .
 docker run -p 80:80 radaisystems
 ```
 
-The application will run locally. Navigate to `http://0.0.0.0/` in your browser to send requests, or follow the FastAPI instructions printed to your terminal.
+The application will run locally. Navigate to localhost in your browser to send requests, or follow the FastAPI instructions printed to your terminal.
 
 ### Setup Explanation
 

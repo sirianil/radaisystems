@@ -88,11 +88,13 @@ def test_search_address_starts_with_match(client):
     assert len(results) == 1
     assert results[0]["address"] == "100 SANSOME ST"
 
-def test_search_address_mid_string_returns_nothing(client):
-    # "SANSOME" appears mid-address, so startsWith should not match
+def test_search_address_mid_string_match(client):
+    # "SANSOME" appears in two addresses — substring match should return both
     response = client.get("/permits/search/address?address=SANSOME")
     assert response.status_code == 200
-    assert response.json() == []
+    results = response.json()
+    assert len(results) == 2
+    assert all("SANSOME" in r["address"] for r in results)
 
 def test_search_address_no_match_returns_empty(client):
     response = client.get("/permits/search/address?address=xyz")
