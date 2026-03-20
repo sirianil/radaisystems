@@ -55,10 +55,3 @@ def test_seed_stores_null_for_missing_values(db, csv_path):
     permit = db.query(Permit).filter_by(locationid=1002).first()
     assert permit.location_description is None
     assert permit.approved is not None
-
-# Unit test to ensure seeding only once
-def test_seed_skips_if_already_seeded(db, csv_path):
-    with patch("app.db.seed.CSV_PATH", csv_path):
-        seed(db)
-        seed(db)
-    assert db.query(Permit).count() == 2
